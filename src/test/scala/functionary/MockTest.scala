@@ -25,8 +25,8 @@ object MockTest extends SimpleIOSuite {
 
   test("throws error for unexpected value") {
     for {
-      a <- IO(expecting("c").returning("b")("a")).attempt
-      b <- IO(never1[Int, Int]).attempt
+      a <- IO(expecting(0).returning("b")(1)).attempt
+      b <- IO(never1[Int, Int](1)).attempt
     } yield expect(a.isLeft) and expect(b.isLeft)
   }
 
