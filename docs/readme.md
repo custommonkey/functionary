@@ -12,7 +12,7 @@ import functionary.expects
 
 ## Defining a Mock Function
 
-To define a mock function, use the expects function, which takes one or more arguments representing the expected input to the function. You can then use the `returns` method to specify the value that the function should return when called with the expected input.
+To define a mock function, use the `expects` function, which takes one or more arguments representing the expected input to the function. You can then use the `returns` method to specify the value that the function should return when called with the expected input.
 
 ```scala mdoc
 val f = expects(1).returns(2)
@@ -30,7 +30,7 @@ f2(1, 2)
 
 ## Composing Mock Functions
 
-You can compose mock functions to handle multiple cases using the or method. For example, you can define a mock function that returns different values for different input values like this:
+You can compose mock functions to handle multiple cases using the `or` method. For example, you can define a mock function that returns different values for different input values like this:
 
 ```scala mdoc
 val f3 = expects(1).returns(2) or expects(2).returns(4) 
