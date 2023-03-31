@@ -35,7 +35,7 @@ sealed trait MockFunction2[V1, V2, B] extends ((V1, V2) => B) {
       case None =>
         throw new AssertionError(
           s"""Expected ${value.mkString(", ")},
-             |  but was $v1, $v2""".stripMargin
+             |  but was ($v1, $v2)""".stripMargin
         )
     }
 
