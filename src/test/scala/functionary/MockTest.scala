@@ -1,7 +1,8 @@
 package functionary
 
-import cats.effect.IO
 import weaver.SimpleIOSuite
+
+import scala.util.Try
 
 object MockTest extends SimpleIOSuite {
 
@@ -17,7 +18,8 @@ object MockTest extends SimpleIOSuite {
   }
 
   pureTest("predicates") {
-    expect(expects((s: String) => s.isEmpty).returns(1)("") == 1)
+    val p = expects((s: String) => s.isEmpty).returns(1)
+    expect(p("") == 1)
   }
 
   pureTest("returns expected value") {
@@ -40,11 +42,14 @@ object MockTest extends SimpleIOSuite {
       expect(xx(1) == 1)
   }
 
-  test("throws error for unexpected value") {
-    for {
-      a <- IO(expects(0).returns("b")(1)).attempt
-      b <- IO(f3(1)).attempt
-    } yield expect(a.isLeft) and expect(b.isLeft)
+  private def fails[A](f: => A) = Try(f).failed.get.getMessage
+
+  pureTest("throws error for unexpected value") {
+    val ff = fails(expects(0).returns("b")(1))
+    val ee = fails(f3(1))
+    println(ee)
+    expect(ff.startsWith("""Expected 0""")) and
+      expect(ee startsWith "Expected ,") // TODO Better error
   }
 
 }

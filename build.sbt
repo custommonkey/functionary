@@ -5,15 +5,17 @@ ThisBuild / scalaVersion := "3.2.2"
 lazy val root = (project in file("."))
   .settings(
     name := "functionary",
-    libraryDependencies += "com.disneystreaming" %% "weaver-cats" % "0.8.2" % Test
+    libraryDependencies ++= List(
+      "com.disneystreaming" %% "weaver-cats" % "0.8.2" % Test,
+      "com.lihaoyi" %% "sourcecode" % "0.3.0"
+    )
   )
 
 ThisBuild / testFrameworks += new TestFramework("weaver.framework.CatsEffect")
 ThisBuild / organization := "com.github.custommonkey"
 ThisBuild / crossScalaVersions := List("3.2.2", "2.13.10")
 
-
-lazy val docs = project       // new documentation project
+lazy val docs = project // new documentation project
   .in(file("myproject-docs")) // important: it must not be docs/
   .dependsOn(root)
   .enablePlugins(MdocPlugin)
