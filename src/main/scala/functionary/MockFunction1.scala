@@ -7,14 +7,14 @@ sealed trait MockFunction1[A, B] extends (A => B) {
   def or(that: MockFunction1[A, B]): MockFunction1[A, B] =
     Or(this, that)
 
-  def value: List[A]
+  def describe: List[String]
 
   def apply(actual: A): B =
     matches(actual) match {
       case Some(value) => value
       case None =>
         throw new AssertionError(
-          s"""Expected ${value.mkString(", ")},
+          s"""Expected ${describe.mkString(", ")},
              |  but was $actual""".stripMargin
         )
     }
@@ -41,14 +41,24 @@ sealed trait MockFunction2[V1, V2, B] extends ((V1, V2) => B) {
 
 }
 
+protected case class PValue1[A, B](expected: A => Boolean, returning: B)
+    extends MockFunction1[A, B] {
+
+  override def matches(actual: A): Option[B] =
+    if (expected(actual)) Some(returning)
+    else None
+
+  override def describe: List[String] = List(expected.toString())
+}
+
 protected case class Value1[A, B](expected: A, returning: B)
     extends MockFunction1[A, B] {
 
   override def matches(actual: A): Option[B] =
-    if (actual == expected) Some(returning)
+    if (expected == actual) Some(returning)
     else None
 
-  override def value: List[A] = List(expected)
+  override def describe: List[String] = List(expected.toString)
 }
 
 protected case class Value2[V1, V2, R](v1: V1, v2: V2, returning: R)
@@ -67,7 +77,7 @@ protected case class Or[A, B](a: MockFunction1[A, B], b: MockFunction1[A, B])
   override def matches(actual: A): Option[B] =
     a.matches(actual).orElse(b.matches(actual))
 
-  override def value: List[A] = a.value ++ b.value
+  override def describe: List[String] = a.describe ++ b.describe
 }
 
 protected case class Or2[V1, V2, B](
@@ -84,7 +94,7 @@ protected case class Or2[V1, V2, B](
 protected class AAny[V1, R](r: R) extends MockFunction1[V1, R] {
   override def matches(a: V1): Option[R] = Some(r)
 
-  override def value: List[V1] = Nil
+  override def describe: List[String] = Nil
 }
 
 class ExpectAny1[V1] {
@@ -94,7 +104,7 @@ class ExpectAny1[V1] {
 protected class Never1[A, B]() extends MockFunction1[A, B] {
   override def matches(a: A): Option[B] = None
 
-  override def value: List[A] = Nil
+  override def describe: List[String] = Nil
 }
 
 protected class Never2[V1, V2, B]() extends MockFunction2[V1, V2, B] {
@@ -105,6 +115,9 @@ protected class Never2[V1, V2, B]() extends MockFunction2[V1, V2, B] {
 
 class Expect1[V1](v1: V1) {
   def returns[R](r: R): MockFunction1[V1, R] = Value1(v1, r)
+}
+class Predicate1[V1](v1: V1 => Boolean) {
+  def returns[R](r: R): MockFunction1[V1, R] = PValue1(v1, r)
 }
 
 class Expect2[V1, V2](v1: V1, v2: V2) {

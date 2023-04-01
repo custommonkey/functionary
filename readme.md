@@ -21,6 +21,7 @@ val f = expects(1).returns(2)
 f(1)
 // res0: Int = 2
 ```
+
 Functionary supports functions with varying arity. For example, you can define a mock function with two arguments like this:
 ```scala
 val f2 = expects(1, 2).returns(3)
@@ -28,6 +29,18 @@ val f2 = expects(1, 2).returns(3)
 
 f2(1, 2)
 // res1: Int = 3
+```
+
+Functionary also allows the use of predicates. For example, you can define a mock function that takes a string argument and returns 1 if the string is empty:
+```scala
+val f4 = expects((s: String) => s.isEmpty).returns(1)
+// f4: MockFunction1[String, Int] = PValue1(
+//   expected = repl.MdocSession$MdocApp$$Lambda$9458/0x0000000802489000@61e5c911,
+//   returning = 1
+// )
+
+f4("")
+// res2: Int = 1
 ```
 
 ## Composing Mock Functions
@@ -42,9 +55,9 @@ val f3 = expects(1).returns(2) or expects(2).returns(4)
 // ) 
 
 f3(1)
-// res2: Int = 2
+// res3: Int = 2
 f3(2)
-// res3: Int = 4
+// res4: Int = 4
 ```
 
 ## Limitations

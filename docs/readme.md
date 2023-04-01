@@ -18,14 +18,20 @@ To define a mock function, use the `expects` function, which takes one or more a
 val f = expects(1).returns(2)
 
 f(1)
-
 ```
+
 Functionary supports functions with varying arity. For example, you can define a mock function with two arguments like this:
 ```scala mdoc
-
 val f2 = expects(1, 2).returns(3)
 
 f2(1, 2)
+```
+
+Functionary also allows the use of predicates. For example, you can define a mock function that takes a string argument and returns 1 if the string is empty:
+```scala mdoc
+val f4 = expects((s: String) => s.isEmpty).returns(1)
+
+f4("")
 ```
 
 ## Composing Mock Functions

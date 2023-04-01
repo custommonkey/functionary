@@ -5,6 +5,10 @@ package object functionary {
 
   def expectsAny[V1] = new ExpectAny1[V1]
   def expects[V1](v1: V1): Expect1[V1] = new Expect1[V1](v1)
+  def expects[V1](v1: V1 => Boolean): Predicate1[V1] = new Predicate1[V1](v1)
+  def expects[V1, R](t: (V1, R)): MockFunction1[V1, R] = new Value1(t._1, t._2)
+  def expects[V1, V2, R](t: ((V1, V2), R)): MockFunction2[V1, V2, R] =
+    new Value2(t._1._1, t._1._2, t._2)
   def expects[V1, V2](v1: V1, v2: V2): Expect2[V1, V2] =
     new Expect2[V1, V2](v1, v2)
 

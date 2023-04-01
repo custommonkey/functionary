@@ -9,13 +9,22 @@ object MockTest extends SimpleIOSuite {
   private val f2: MockFunction2[Int, Int, String] = expects(1, 2).returns("b")
   private val f3 = never1[Int, Int]
   private val f4 = expectsAny[Int].returns("b")
+//  private val f5: MockFunction1[Int, Int] = expects(1 , 2)
+//  private val f6: MockFunction2[Int, Int, Int] = expects((1, 2) -> 2)
 
   pureTest("default values") {
     expect(f4(0) == "b")
   }
 
+  pureTest("predicates") {
+    expect(expects((s: String) => s.isEmpty).returns(1)("") == 1)
+  }
+
   pureTest("returns expected value") {
     expect(f1("a") == "b") and expect(f2(1, 2) == "b")
+    // and
+//      expect(f5(1) == 2) and
+//      expect(f6(1, 2) == 2)
   }
 
   pureTest("combine mock functions") {
