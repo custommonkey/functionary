@@ -6,22 +6,26 @@ import scala.util.chaining.scalaUtilChainingOps
 
 object Boilerplate {
 
-  def gen(file: File): Seq[File] = (1 to 3).map { arity =>
+  def gen(file: File): Seq[File] = (1 to 5).map { arity =>
     val name = s"MockFunction$arity"
-    new File(new File(file, "functionary2"), s"$name.scala").tap { file =>
+    new File(new File(file, "functionary"), s"$name.scala").tap { file =>
       println(s"Making file $file")
       val range = (1 to arity)
       val typeParams = range.map { i => s"V$i" }.mkString(", ")
       val params = range.map { i => s"v$i: V$i" }.mkString(", ")
+      val predicates = range.map { i => s"p$i: V$i => Boolean" }.mkString(", ")
+      val predicateNames = range.map { i => s"p$i" }.mkString(", ")
       val paramsNames = range.map { i => s"v$i" }.mkString(", ")
+      val moreParamsNames = range.map { i => s"$$v$i" }.mkString(", ")
       val typ = s"$name[$typeParams, R]"
       val compare = range.map { i => s"v$i == this.v$i" }.mkString(" && ")
+      val applyPredicates = range.map { i => s"p$i(v$i)" }.mkString(" && ")
       val description = range.map { n => s"v$n.toString" }.mkString(", ")
       createDirectory(file.getParentFile)
       writeLines(
         file,
         List(s"""
-          |package functionary2
+          |package functionary
           |
           |import functionary.Location
           |
@@ -40,12 +44,37 @@ object Boilerplate {
           |      case None =>
           |        throw new AssertionError(
           |          s\"\"\"Expected $${value.mkString(", ")},
-          |             |  but was (v1, v2)\"\"\".stripMargin
+          |             |  but was ($moreParamsNames)\"\"\".stripMargin
           |        )
           |    }
-          |  }
           |
-          |private case class Or$arity[$typeParams, R](a: $typ, b: $typ) extends $typ {
+          |  override def toString(): String = this match {
+          |    case Value$arity($paramsNames, returns, _) =>
+          |      s"mock function($moreParamsNames) = $$returns"
+          |    case _        => ???
+          |  }
+          |}
+          |
+          |class Never$arity[$typeParams, R](location: Location) extends $typ {
+          |  override def matches($params): Option[R] = None
+          |  override def value: List[($typeParams)] = Nil
+          |  override def locations: List[Location] = List(location)
+          |  override def describe: List[String] = Nil
+          |}
+          |
+          |protected class AAny$arity[$typeParams, R](r: R, location: Location)
+          |    extends $typ {
+          |  override def matches($params): Option[R] = Some(r)
+          |  override def describe: List[String] = Nil
+          |  override def locations: List[Location] = List(location)
+          |  override def value: List[($typeParams)] = Nil
+          |}
+          |
+          |class ExpectAny$arity[$typeParams](location: Location) {
+          |  def returns[R](r: R): $typ = new AAny$arity(r, location)
+          |}
+          |
+          |case class Or$arity[$typeParams, R](a: $typ, b: $typ) extends $typ {
           |  override def matches($params): Option[R] =
           |    a.matches($paramsNames).orElse(b.matches($paramsNames))
           |
@@ -58,7 +87,7 @@ object Boilerplate {
           |  def returns[R](r: R): $typ = Value$arity($paramsNames, r, location)
           |}
           |
-          |protected case class Value$arity[$typeParams, R]($params, returns: R, location: Location)
+          |case class Value$arity[$typeParams, R]($params, returns: R, location: Location)
           |    extends $typ {
           |
           |  override def matches($params): Option[R] =
@@ -70,17 +99,21 @@ object Boilerplate {
           |  override def locations: List[Location] = List(location)
           |}
           |
-          |protected case class Predicate$arity[$typeParams, R](
-          |    expected: ($typeParams) => Boolean,
+          |class PartialPredicate$arity[$typeParams]($predicates, location: Location) {
+          |  def returns[R](r: R): $typ = Predicate$arity($predicateNames, r, location)
+          |}
+          |
+          |case class Predicate$arity[$typeParams, R](
+          |    $predicates,
           |    returns: R,
           |    location: Location
           |) extends $typ {
           |
           |  override def matches($params): Option[R] =
-          |    if (expected($paramsNames)) Some(returns)
+          |    if ($applyPredicates) Some(returns)
           |    else None
           |
-          |  override def describe: List[String] = List(expected.toString())
+          |  override def describe: List[String] = Nil
           |  override def locations: List[Location] = List(location)
           |  override def value: List[($typeParams)] = Nil
           |}

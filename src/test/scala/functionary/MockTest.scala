@@ -8,8 +8,9 @@ object MockTest extends SimpleIOSuite {
 
   private val f1: MockFunction1[String, String] = expects("a").returns("b")
   private val f2: MockFunction2[Int, Int, String] = expects(1, 2).returns("b")
-  private val f3 = never1[Int, Int]
-  private val f4 = expectsAny[Int].returns("b")
+  private val f3: MockFunction1[Int, Int] = never1[Int, Int]
+  private val f4: MockFunction1[Int, String] =
+    expectsAny[Int].returns("b")
 //  private val f5: MockFunction1[Int, Int] = expects(1 , 2)
 //  private val f6: MockFunction2[Int, Int, Int] = expects((1, 2) -> 2)
 
