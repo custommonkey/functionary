@@ -1,5 +1,7 @@
 # Functionary
 
+[![Continuous Integration](https://github.com/custommonkey/functionary/actions/workflows/ci.yml/badge.svg)](https://github.com/custommonkey/functionary/actions/workflows/ci.yml)
+
 Functionary is a Scala library that provides an easy-to-use API for mocking functions in your code. It allows you to create mock functions that simulate the behavior of real functions without actually executing them, which can be useful for testing purposes.
 
 ## Getting Started
