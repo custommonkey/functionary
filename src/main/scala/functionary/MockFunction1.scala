@@ -20,6 +20,15 @@ sealed trait MockFunction1[A, B] extends (A => B) {
              |  at ${locations.mkString(", ")}""".stripMargin
         )
     }
+
+  override def toString(): String = this match {
+    case PValue1(_, _, _) => ???
+    case Value1(expected, returns, _) =>
+      s"mock function($expected) = $returns"
+    case Or(_, _)        => ???
+    case _: AAny[_, _]   => ???
+    case _: Never1[_, _] => ???
+  }
 }
 
 sealed trait MockFunction2[V1, V2, B] extends ((V1, V2) => B) {
@@ -45,36 +54,36 @@ sealed trait MockFunction2[V1, V2, B] extends ((V1, V2) => B) {
 
 protected case class PValue1[A, B](
     expected: A => Boolean,
-    returning: B,
-    line: Location
+    returns: B,
+    location: Location
 ) extends MockFunction1[A, B] {
 
   override def matches(actual: A): Option[B] =
-    if (expected(actual)) Some(returning)
+    if (expected(actual)) Some(returns)
     else None
 
   override def describe: List[String] = List(expected.toString())
 
-  override def locations: List[Location] = List(line)
+  override def locations: List[Location] = List(location)
 }
 
-protected case class Value1[A, B](expected: A, returning: B, line: Location)
+protected case class Value1[A, B](expected: A, returns: B, location: Location)
     extends MockFunction1[A, B] {
 
   override def matches(actual: A): Option[B] =
-    if (expected == actual) Some(returning)
+    if (expected == actual) Some(returns)
     else None
 
   override def describe: List[String] = List(expected.toString)
 
-  override def locations: List[Location] = List(line)
+  override def locations: List[Location] = List(location)
 }
 
-protected case class Value2[V1, V2, R](v1: V1, v2: V2, returning: R)
+protected case class Value2[V1, V2, R](v1: V1, v2: V2, returns: R)
     extends MockFunction2[V1, V2, R] {
 
   override def matches(_v1: V1, _v2: V2): Option[R] =
-    if (v1 == _v1 && v2 == _v2) Some(returning)
+    if (v1 == _v1 && v2 == _v2) Some(returns)
     else None
 
   override def value: List[(V1, V2)] = List((v1, v2))
@@ -102,24 +111,25 @@ protected case class Or2[V1, V2, B](
   override def value: List[(V1, V2)] = a.value ++ b.value
 }
 
-protected class AAny[V1, R](r: R, line: Location) extends MockFunction1[V1, R] {
+protected class AAny[V1, R](r: R, location: Location)
+    extends MockFunction1[V1, R] {
   override def matches(a: V1): Option[R] = Some(r)
 
   override def describe: List[String] = Nil
 
-  override def locations: List[Location] = List(line)
+  override def locations: List[Location] = List(location)
 }
 
-class ExpectAny1[V1](line: Location) {
-  def returns[R](r: R): MockFunction1[V1, R] = new AAny(r, line)
+class ExpectAny1[V1](location: Location) {
+  def returns[R](r: R): MockFunction1[V1, R] = new AAny(r, location)
 }
 
-protected class Never1[A, B](line: Location) extends MockFunction1[A, B] {
+protected class Never1[A, B](location: Location) extends MockFunction1[A, B] {
   override def matches(a: A): Option[B] = None
 
   override def describe: List[String] = Nil
 
-  override def locations: List[Location] = List(line)
+  override def locations: List[Location] = List(location)
 }
 
 protected class Never2[V1, V2, B]() extends MockFunction2[V1, V2, B] {
@@ -128,11 +138,11 @@ protected class Never2[V1, V2, B]() extends MockFunction2[V1, V2, B] {
   override def value: List[(V1, V2)] = Nil
 }
 
-class Expect1[V1](v1: V1, line: Location) {
-  def returns[R](r: R): MockFunction1[V1, R] = Value1(v1, r, line)
+class Expect1[V1](v1: V1, location: Location) {
+  def returns[R](r: R): MockFunction1[V1, R] = Value1(v1, r, location)
 }
-class Predicate1[V1](v1: V1 => Boolean, line: Location) {
-  def returns[R](r: R): MockFunction1[V1, R] = PValue1(v1, r, line)
+class Predicate1[V1](v1: V1 => Boolean, location: Location) {
+  def returns[R](r: R): MockFunction1[V1, R] = PValue1(v1, r, location)
 }
 
 class Expect2[V1, V2](v1: V1, v2: V2) {

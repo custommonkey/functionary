@@ -16,7 +16,11 @@ To define a mock function, use the `expects` function, which takes one or more a
 
 ```scala
 val f = expects(1).returns(2)
-// f: MockFunction1[Int, Int] = Value1(expected = 1, returning = 2)
+// f: functionary.MockFunction1[Int, Int] = Value1(
+//   expected = 1,
+//   returns = 2,
+//   location = Location(file = File(value = "readme.md"), line = Line(value = 14))
+// )
 
 f(1)
 // res0: Int = 2
@@ -25,7 +29,11 @@ f(1)
 Functionary supports functions with varying arity. For example, you can define a mock function with two arguments like this:
 ```scala
 val f2 = expects(1, 2).returns(3)
-// f2: MockFunction2[Int, Int, Int] = Value2(v1 = 1, v2 = 2, returning = 3)
+// f2: functionary.MockFunction2[Int, Int, Int] = Value2(
+//   v1 = 1,
+//   v2 = 2,
+//   returns = 3
+// )
 
 f2(1, 2)
 // res1: Int = 3
@@ -34,9 +42,10 @@ f2(1, 2)
 Functionary also allows the use of predicates. For example, you can define a mock function that takes a string argument and returns 1 if the string is empty:
 ```scala
 val f4 = expects((s: String) => s.isEmpty).returns(1)
-// f4: MockFunction1[String, Int] = PValue1(
-//   expected = repl.MdocSession$MdocApp$$Lambda$9458/0x0000000802489000@61e5c911,
-//   returning = 1
+// f4: functionary.MockFunction1[String, Int] = PValue1(
+//   expected = <function1>,
+//   returns = 1,
+//   location = Location(file = File(value = "readme.md"), line = Line(value = 32))
 // )
 
 f4("")
@@ -49,9 +58,23 @@ You can compose mock functions to handle multiple cases using the `or` method. F
 
 ```scala
 val f3 = expects(1).returns(2) or expects(2).returns(4) 
-// f3: MockFunction1[Int, Int] = Or(
-//   a = Value1(expected = 1, returning = 2),
-//   b = Value1(expected = 2, returning = 4)
+// f3: functionary.MockFunction1[Int, Int] = Or(
+//   a = Value1(
+//     expected = 1,
+//     returns = 2,
+//     location = Location(
+//       file = File(value = "readme.md"),
+//       line = Line(value = 41)
+//     )
+//   ),
+//   b = Value1(
+//     expected = 2,
+//     returns = 4,
+//     location = Location(
+//       file = File(value = "readme.md"),
+//       line = Line(value = 41)
+//     )
+//   )
 // ) 
 
 f3(1)

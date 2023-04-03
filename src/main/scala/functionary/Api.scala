@@ -3,9 +3,7 @@ package functionary
 protected trait Api {
 
   def never1[V1, R](implicit location: Location): MockFunction1[V1, R] =
-    new Never1(
-      location
-    )
+    new Never1(location)
   def never2[V1, V2, R]: MockFunction2[V1, V2, R] =
     new Never2()
 

@@ -52,4 +52,8 @@ object MockTest extends SimpleIOSuite {
       expect(ee startsWith "Expected ,") // TODO Better error
   }
 
+  pureTest("sane to string") {
+    expect(f1.toString() == "mock function(a) = b")
+  }
+
 }

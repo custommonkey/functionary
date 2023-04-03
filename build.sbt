@@ -17,5 +17,8 @@ ThisBuild / crossScalaVersions := List("3.2.2", "2.13.10")
 
 lazy val docs = project // new documentation project
   .in(file("myproject-docs")) // important: it must not be docs/
+  .settings(
+    publish := {}
+  )
   .dependsOn(root)
   .enablePlugins(MdocPlugin)
