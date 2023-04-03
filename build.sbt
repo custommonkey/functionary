@@ -8,7 +8,10 @@ lazy val root = (project in file("."))
     libraryDependencies ++= List(
       "com.disneystreaming" %% "weaver-cats" % "0.8.2" % Test,
       "com.lihaoyi" %% "sourcecode" % "0.3.0"
-    )
+    ),
+    Compile / sourceGenerators += (Compile / sourceManaged)
+      .map(Boilerplate.gen)
+      .taskValue
   )
 
 ThisBuild / testFrameworks += new TestFramework("weaver.framework.CatsEffect")
