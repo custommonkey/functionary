@@ -1,13 +1,10 @@
 package functionary
 
-//TODO can we use context function to inject line
-
-private val api = new Api with GeneratedApi
+private val api = new Api{}
 
 export api.flatMock
 export api.expects
-export api.never1
-export api.never2
+export api.never
 export api.expectsAny
-export api.all
+export api.combineAll
 export api.FlatMock

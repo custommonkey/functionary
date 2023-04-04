@@ -11,7 +11,9 @@ object Boilerplate {
 
         val apiFunctions = (1 to 5).flatMap { arity =>
           val range = (1 to arity)
+          val name = s"MockFunction$arity"
           val typeParams = range.map { i => s"V$i" }.mkString(", ")
+          val typ = s"$name[$typeParams, R]"
           val paramsNames = range.map { i => s"v$i" }.mkString(", ")
           val params = range.map { i => s"v$i: V$i" }.mkString(", ")
           val predicates =
@@ -29,6 +31,14 @@ object Boilerplate {
             s"""|
           |  def expectsAny[$typeParams](implicit location: Location): Returns$arity[$typeParams] =
           |    new ExpectAny$arity[$typeParams](location)
+          |""".stripMargin,
+            s"""|
+          |  def never[$typeParams, R](implicit location: Location): $typ =
+          |    new Never$arity(location)
+          |""".stripMargin,
+            s"""|
+          |  def combineAll[$typeParams, R](i: Iterable[$typ]): $typ =
+          |    i.reduce(_ or _)
           |""".stripMargin
           )
         }
@@ -36,7 +46,7 @@ object Boilerplate {
         writeLines(
           file,
           "package functionary" +:
-            "trait GeneratedApi {" +:
+            "private[functionary] trait GeneratedApi {" +:
             apiFunctions :+
             "}"
         )

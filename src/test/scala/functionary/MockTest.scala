@@ -8,7 +8,7 @@ object MockTest extends SimpleIOSuite {
 
   private val f1: MockFunction1[String, String] = expects("a").returns("b")
   private val f2: MockFunction2[Int, Int, String] = expects(1, 2).returns("b")
-  private val f3: MockFunction1[Int, Int] = never1[Int, Int]
+  private val f3: MockFunction1[Int, Int] = never[Int, Int]
   private val f4: MockFunction1[Int, String] =
     expectsAny[Int].returns("b")
 //  private val f5: MockFunction1[Int, Int] = expects(1 , 2)
@@ -34,7 +34,7 @@ object MockTest extends SimpleIOSuite {
   pureTest("combine mock functions") {
     val value = expects("b").returns("b")
     val f = f1 or f1 or value
-    val ff = all(List(f1, f1, value))
+    val ff = combineAll(List(f1, f1, value))
     val xx: MockFunction1[Int, Int] = (0 to 1).flatMock { i =>
       expects(i).returns(i)
     }
