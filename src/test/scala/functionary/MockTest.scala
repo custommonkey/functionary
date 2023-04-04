@@ -19,7 +19,8 @@ object MockTest extends SimpleIOSuite {
   }
 
   pureTest("predicates") {
-    val p = expects((s: String) => s.isEmpty).returns(1)
+    val p: MockFunction1[String, Int] =
+      expects((s: String) => s.isEmpty).returns(1)
     expect(p("") == 1)
   }
 

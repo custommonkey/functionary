@@ -11,33 +11,15 @@ protected trait Api {
   ): MockFunction2[V1, V2, R] =
     new Never2(location)
 
-  def expectsAny[V1](implicit location: Location) =
-    new ExpectAny1[V1](location)
-
-  def expects[V1](v1: V1)(implicit
-      location: Location
-  ): Expect1[V1] =
-    new Expect1[V1](v1, location)
-
-  def expects[V1](v1: V1 => Boolean)(implicit
-      location: Location
-  ): PartialPredicate1[V1] =
-    new PartialPredicate1[V1](v1, location)
-
   def expects[V1, R](t: (V1, R))(implicit
       location: Location
   ): MockFunction1[V1, R] =
-    new Value1(t._1, t._2, location)
+    Value1(t._1, t._2, location)
 
   def expects[V1, V2, R](
       t: ((V1, V2), R)
   )(implicit location: Location): MockFunction2[V1, V2, R] =
-    new Value2(t._1._1, t._1._2, t._2, location)
-
-  def expects[V1, V2](v1: V1, v2: V2)(implicit
-      location: Location
-  ): Expect2[V1, V2] =
-    new Expect2[V1, V2](v1, v2, location)
+    Value2(t._1._1, t._1._2, t._2, location)
 
   def all[A, B](
       i: Iterable[MockFunction1[A, B]]

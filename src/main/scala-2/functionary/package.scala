@@ -1,1 +1,1 @@
-package object functionary extends Api
+package object functionary extends Api with GeneratedApi
