@@ -34,8 +34,8 @@ object MockTest extends SimpleIOSuite {
   pureTest("combine mock functions") {
     val value = expects("b").returns("b")
     val f = f1 or f1 or value
-    val ff = combineAll(List(f1, f1, value))
-    val xx: MockFunction1[Int, Int] = (0 to 1).flatMock { i =>
+    val ff = combineAll(f1, f1, value)
+    val xx = (0 to 1).foldMock { i =>
       expects(i).returns(i)
     }
 

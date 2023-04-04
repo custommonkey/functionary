@@ -10,6 +10,8 @@ To get started with Functionary, simply add it as a dependency to your Scala pro
 
 ```scala
 import functionary.expects
+import functionary.combineAll
+import functionary.FoldsOps
 ```
 
 ## Defining a Mock Function
@@ -54,6 +56,26 @@ f3(1)
 // res3: Int = 2
 f3(2)
 // res4: Int = 4
+```
+
+```scala
+val list = combineAll((1 to 4).map { i => expects(i).returns(i * 2) })
+// list: functionary.MockFunction1[Int, Int] = (((mock function expects 1 and returns 2) or (mock function expects 2 and returns 4)) or (mock function expects 3 and returns 6)) or (mock function expects 4 and returns 8)
+
+list(1)
+// res5: Int = 2
+list(2)
+// res6: Int = 4
+```
+
+```scala
+val folded = (1 to 4).foldMock { i => expects(i).returns(i * 10) }
+// folded: functionary.MockFunction1[Int, Int] = (((mock function expects 1 and returns 10) or (mock function expects 2 and returns 20)) or (mock function expects 3 and returns 30)) or (mock function expects 4 and returns 40)
+
+folded(1)
+// res7: Int = 10
+folded(2)
+// res8: Int = 20
 ```
 
 ## Limitations

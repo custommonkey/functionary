@@ -5,20 +5,76 @@ import scala.util.chaining.scalaUtilChainingOps
 
 object Boilerplate {
 
+  case class Parts(
+      range: Range,
+      name: String,
+      typeParams: String,
+      params: String,
+      predicates: String,
+      predicateNames: String,
+      paramsNames: String,
+      moreParamsNames: String,
+      typ: String,
+      compare: String,
+      applyPredicates: String,
+      description: String
+  )
+
+  object Parts {
+    def apply(arity: Int): Parts = {
+      val range = (1 to arity)
+      val name = s"MockFunction$arity"
+      def all(f: Int => String) = range.map(f).mkString(", ")
+      def and(f: Int => String) = range.map(f).mkString(" && ")
+      val typeParams = all(i => s"V$i")
+      new Parts(
+        range,
+        name,
+        typeParams,
+        all(i => s"v$i: V$i"),
+        all(i => s"p$i: V$i => Boolean"),
+        all(i => s"p$i"),
+        all(i => s"v$i"),
+        all(i => s"$$v$i"),
+        s"$name[$typeParams, R]",
+        and(i => s"v$i == this.v$i"),
+        and(i => s"p$i(v$i)"),
+        all(n => s"v$n.toString")
+      )
+    }
+  }
+
   def gen(outDir: File): Seq[File] = {
+    val extensionFile = new File(packageDir(outDir), "Folding.scala").tap {
+      file =>
+
+        val apiFunctions = (1 to 5).flatMap { arity =>
+          val parts = Parts(arity)
+          import parts._
+          List(
+            s"""
+             |  def foldMock[$typeParams, R](f: A => $typ): $typ =
+             |    functionary.foldMock[A, $typeParams, R](i)(f)
+             |""".stripMargin
+          )
+        }
+        writeLines(
+          file,
+          "package functionary" +:
+            "private[functionary] trait Folding {" +:
+            "  implicit class FoldsOps[A](i: Iterable[A]) {" +:
+            apiFunctions :+
+            "  }" :+
+            "}"
+        )
+    }
+
     val apiFile = new File(packageDir(outDir), "GeneratedApi.scala").tap {
       file =>
 
         val apiFunctions = (1 to 5).flatMap { arity =>
-          val range = (1 to arity)
-          val name = s"MockFunction$arity"
-          val typeParams = range.map { i => s"V$i" }.mkString(", ")
-          val typ = s"$name[$typeParams, R]"
-          val paramsNames = range.map { i => s"v$i" }.mkString(", ")
-          val params = range.map { i => s"v$i: V$i" }.mkString(", ")
-          val predicates =
-            range.map { i => s"p$i: V$i => Boolean" }.mkString(", ")
-          val predicateNames = range.map { i => s"p$i" }.mkString(", ")
+          val parts = Parts(arity)
+          import parts._
           List(
             s"""
                 |  def expects[$typeParams]($params)(implicit location: Location): Returns$arity[$typeParams] =
@@ -41,6 +97,10 @@ object Boilerplate {
                 |    i.reduce(_ or _)
                 |""".stripMargin,
             s"""
+               |  def combineAll[$typeParams, R](i: $typ*): $typ =
+               |    i.reduce(_ or _)
+               |""".stripMargin,
+            s"""
                 |  def foldMock[A, $typeParams, R](i: Iterable[A])(f: A => $typ): $typ =
                 |    combineAll(i.map(f))
                 |""".stripMargin
@@ -58,23 +118,11 @@ object Boilerplate {
 
     (1 to 5).map { arity =>
 
-      val name = s"MockFunction$arity"
+      val parts = Parts(arity)
+      import parts._
 
       outFile(outDir, name).tap { file =>
         println(s"Making file $file")
-
-        val range = (1 to arity)
-        val typeParams = range.map { i => s"V$i" }.mkString(", ")
-        val params = range.map { i => s"v$i: V$i" }.mkString(", ")
-        val predicates =
-          range.map { i => s"p$i: V$i => Boolean" }.mkString(", ")
-        val predicateNames = range.map { i => s"p$i" }.mkString(", ")
-        val paramsNames = range.map { i => s"v$i" }.mkString(", ")
-        val moreParamsNames = range.map { i => s"$$v$i" }.mkString(", ")
-        val typ = s"$name[$typeParams, R]"
-        val compare = range.map { i => s"v$i == this.v$i" }.mkString(" && ")
-        val applyPredicates = range.map { i => s"p$i(v$i)" }.mkString(" && ")
-        val description = range.map { n => s"v$n.toString" }.mkString(", ")
 
         val predicateClass =
           s"""private case class Predicate$arity[$typeParams, R](
@@ -200,7 +248,7 @@ object Boilerplate {
           )
         )
       }
-    } :+ apiFile
+    } :+ apiFile :+ extensionFile
   }
 
   private def packageDir(outDir: File) =

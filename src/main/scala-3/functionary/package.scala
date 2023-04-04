@@ -7,4 +7,4 @@ export api.expects
 export api.never
 export api.expectsAny
 export api.combineAll
-export api.FlatMock
+export api.FoldsOps
