@@ -146,6 +146,7 @@ object Boilerplate {
              |      case None =>
              |        throw new AssertionError(
              |          s\"\"\"Expected $${value.mkString(", ")},
+             |             |  defined at $${locations.mkString("\\n  ")}
              |             |  but was ($moreParamsNames)\"\"\".stripMargin
              |        )
              |    }
