@@ -55,7 +55,7 @@ object MockTest extends SimpleIOSuite {
   }
 
   pureTest("sane to string") {
-    expect(f1.toString() == "mock function(a) = b")
+    expect(f1.toString() == "mock function expects a and returns b")
   }
 
 }
