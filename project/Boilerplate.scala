@@ -153,8 +153,12 @@ object Boilerplate {
              |
              |  override def toString(): String = this match {
              |    case Value$arity($paramsNames, returns, _) =>
-             |      s"mock function($moreParamsNames) = $$returns"
-             |    case _        => ???
+             |      s"mock function expects $moreParamsNames and returns $$returns"
+             |    case Predicate$arity($paramsNames, returns, _) =>
+             |      s"mock function expects $moreParamsNames and returns $$returns"
+             |    case Or$arity(a, b) =>
+             |      s"($$a) or ($$b)"
+             |    case _ => ???
              |  }
              |}""".stripMargin
 

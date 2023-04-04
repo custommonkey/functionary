@@ -16,21 +16,21 @@ import functionary.expects
 
 To define a mock function, use the `expects` function, which takes one or more arguments representing the expected input to the function. You can then use the `returns` method to specify the value that the function should return when called with the expected input.
 
-```scala mdoc
+```scala mdoc:to-string
 val f = expects(1).returns(2)
 
 f(1)
 ```
 
 Functionary supports functions with varying arity. For example, you can define a mock function with two arguments like this:
-```scala mdoc
+```scala mdoc:to-string
 val f2 = expects(1, 2).returns(3)
 
 f2(1, 2)
 ```
 
 Functionary also allows the use of predicates. For example, you can define a mock function that takes a string argument and returns 1 if the string is empty:
-```scala mdoc
+```scala mdoc:to-string
 val f4 = expects((s: String) => s.isEmpty).returns(1)
 
 f4("")
@@ -40,7 +40,7 @@ f4("")
 
 You can compose mock functions to handle multiple cases using the `or` method. For example, you can define a mock function that returns different values for different input values like this:
 
-```scala mdoc
+```scala mdoc:to-string
 val f3 = expects(1).returns(2) or expects(2).returns(4) 
 
 f3(1)

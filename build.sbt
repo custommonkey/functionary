@@ -1,6 +1,8 @@
+import _root_.io.github.davidgregory084.DevMode
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "3.2.2"
+ThisBuild / scalaVersion := "2.13.10"
 
 lazy val root = (project in file("."))
   .settings(
@@ -19,10 +21,12 @@ ThisBuild / organization := "com.github.custommonkey"
 ThisBuild / crossScalaVersions := List("3.2.2", "2.13.10")
 ThisBuild / versionScheme := Some("early-semver")
 
-//lazy val docs = project // new documentation project
-//.in(file("myproject-docs")) // important: it must not be docs/
-//.settings(
-//publish := {}
-//)
-//.dependsOn(root)
-//.enablePlugins(MdocPlugin)
+lazy val docs = project // new documentation project
+  .in(file("myproject-docs")) // important: it must not be docs/
+  .settings(
+    crossScalaVersions := Nil,
+    scalaVersion := "2.13.10",
+    tpolecatOptionsMode := _root_.io.github.davidgregory084.DevMode
+  )
+  .dependsOn(root)
+  .enablePlugins(MdocPlugin)
