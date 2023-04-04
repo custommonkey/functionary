@@ -17,11 +17,12 @@ lazy val root = (project in file("."))
 ThisBuild / testFrameworks += new TestFramework("weaver.framework.CatsEffect")
 ThisBuild / organization := "com.github.custommonkey"
 ThisBuild / crossScalaVersions := List("3.2.2", "2.13.10")
+ThisBuild / versionScheme := Some("early-semver")
 
 //lazy val docs = project // new documentation project
-  //.in(file("myproject-docs")) // important: it must not be docs/
-  //.settings(
-    //publish := {}
-  //)
-  //.dependsOn(root)
-  //.enablePlugins(MdocPlugin)
+//.in(file("myproject-docs")) // important: it must not be docs/
+//.settings(
+//publish := {}
+//)
+//.dependsOn(root)
+//.enablePlugins(MdocPlugin)

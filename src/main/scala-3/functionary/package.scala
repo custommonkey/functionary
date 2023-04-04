@@ -1,8 +1,8 @@
 package functionary
 
-private val api = new Api{}
+private val api = new Api {}
 
-export api.flatMock
+export api.foldMock
 export api.expects
 export api.never
 export api.expectsAny

@@ -12,24 +12,14 @@ private[functionary] trait Api extends GeneratedApi {
   )(implicit location: Location): MockFunction2[V1, V2, R] =
     Value2(t._1._1, t._1._2, t._2, location)
 
-  def flatMock[A, B, C](i: Iterable[A])(
-      f: A => MockFunction1[B, C]
-  ): MockFunction1[B, C] = combineAll(i.map(f))
-
-  def flatMock2[A, B, C, D](i: Iterable[A])(
-      f: A => MockFunction2[B, C, D]
-  ): MockFunction2[B, C, D] = combineAll(i.map(f))
-
   final implicit class FlatMock[A](i: Iterable[A]) {
-    def flatMock[B, C](
-        f: A => MockFunction1[B, C]
-    ): MockFunction1[B, C] =
-      functionary.flatMock(i)(f)
+    def flatMock[B, C](f: A => MockFunction1[B, C]): MockFunction1[B, C] =
+      foldMock[A, B, C](i)(f)
 
     def flatMock[B, C, D](
         f: A => MockFunction2[B, C, D]
     ): MockFunction2[B, C, D] =
-      flatMock2(i)(f)
+      foldMock[A, B, C, D](i)(f)
   }
 
 }
