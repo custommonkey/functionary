@@ -10,6 +10,7 @@ To get started with Functionary, simply add it as a dependency to your Scala pro
 
 ```scala
 import functionary.expects
+import functionary.tuple
 import functionary.combineAll
 import functionary.FoldsOps
 ```
@@ -44,6 +45,14 @@ f4("")
 // res2: Int = 1
 ```
 
+```scala
+val f5 = tuple((1, 2) -> 3)
+// f5: functionary.MockFunction2[Int, Int, Int] = mock function expects 1, 2 and returns 3
+
+f5(1, 2)
+// res3: Int = 3
+```
+
 ## Composing Mock Functions
 
 You can compose mock functions to handle multiple cases using the `or` method. For example, you can define a mock function that returns different values for different input values like this:
@@ -53,9 +62,9 @@ val f3 = expects(1).returns(2) or expects(2).returns(4)
 // f3: functionary.MockFunction1[Int, Int] = (mock function expects 1 and returns 2) or (mock function expects 2 and returns 4) 
 
 f3(1)
-// res3: Int = 2
+// res4: Int = 2
 f3(2)
-// res4: Int = 4
+// res5: Int = 4
 ```
 
 ```scala
@@ -63,9 +72,9 @@ val list = combineAll((1 to 4).map { i => expects(i).returns(i * 2) })
 // list: functionary.MockFunction1[Int, Int] = (((mock function expects 1 and returns 2) or (mock function expects 2 and returns 4)) or (mock function expects 3 and returns 6)) or (mock function expects 4 and returns 8)
 
 list(1)
-// res5: Int = 2
+// res6: Int = 2
 list(2)
-// res6: Int = 4
+// res7: Int = 4
 ```
 
 ```scala
@@ -73,9 +82,9 @@ val folded = (1 to 4).foldMock { i => expects(i).returns(i * 10) }
 // folded: functionary.MockFunction1[Int, Int] = (((mock function expects 1 and returns 10) or (mock function expects 2 and returns 20)) or (mock function expects 3 and returns 30)) or (mock function expects 4 and returns 40)
 
 folded(1)
-// res7: Int = 10
+// res8: Int = 10
 folded(2)
-// res8: Int = 20
+// res9: Int = 20
 ```
 
 ## Limitations

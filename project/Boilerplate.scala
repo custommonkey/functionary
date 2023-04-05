@@ -89,7 +89,7 @@ object Boilerplate {
                 |  def expects[$typeParams]($params)(implicit location: Location): Returns$arity[$typeParams] =
                 |    new PartialExpect$arity[$typeParams]($paramsNames, location)
                 |
-                |  def tuple[$typeParams, R](t: ($x, R))(implicit location: Location): Value$arity[$typeParams, R] =
+                |  def tuple[$typeParams, R](t: ($x, R))(implicit location: Location): $typ =
                 |    new Value$arity[$typeParams, R]($y, t._2, location)
                 |
                 |  def expects[$typeParams]($predicates)(implicit location: Location): Returns$arity[$typeParams] =

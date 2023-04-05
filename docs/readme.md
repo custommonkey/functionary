@@ -10,6 +10,7 @@ To get started with Functionary, simply add it as a dependency to your Scala pro
 
 ```scala mdoc
 import functionary.expects
+import functionary.tuple
 import functionary.combineAll
 import functionary.FoldsOps
 ```
@@ -36,6 +37,12 @@ Functionary also allows the use of predicates. For example, you can define a moc
 val f4 = expects((s: String) => s.isEmpty).returns(1)
 
 f4("")
+```
+
+```scala mdoc:to-string
+val f5 = tuple((1, 2) -> 3)
+
+f5(1, 2)
 ```
 
 ## Composing Mock Functions
