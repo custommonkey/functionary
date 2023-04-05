@@ -17,7 +17,8 @@ object Boilerplate {
       typ: String,
       compare: String,
       applyPredicates: String,
-      description: String
+      description: String,
+      tuple: String
   )
 
   object Parts {
@@ -39,7 +40,8 @@ object Boilerplate {
         s"$name[$typeParams, R]",
         and(i => s"v$i == this.v$i"),
         and(i => s"p$i(v$i)"),
-        all(n => s"v$n.toString")
+        all(i => s"v$i.toString"),
+        all(i => s"t._1._$i")
       )
     }
   }
@@ -72,39 +74,43 @@ object Boilerplate {
     val apiFile = new File(packageDir(outDir), "GeneratedApi.scala").tap {
       file =>
 
-        val apiFunctions = (1 to 5).flatMap { arity =>
+        val apiFunctions = (1 to 5).map { arity =>
           val parts = Parts(arity)
           import parts._
-          List(
-            s"""
+
+          val x = if (arity == 1) {
+            typeParams
+          } else { s"($typeParams)" }
+          val y = if (arity == 1) {
+            "t._1"
+          } else tuple
+
+          s"""
                 |  def expects[$typeParams]($params)(implicit location: Location): Returns$arity[$typeParams] =
                 |    new PartialExpect$arity[$typeParams]($paramsNames, location)
-                |""".stripMargin,
-            s"""
+                |
+                |  def tuple[$typeParams, R](t: ($x, R))(implicit location: Location): Value$arity[$typeParams, R] =
+                |    new Value$arity[$typeParams, R]($y, t._2, location)
+                |
                 |  def expects[$typeParams]($predicates)(implicit location: Location): Returns$arity[$typeParams] =
                 |    new PartialPredicate$arity[$typeParams]($predicateNames, location)
-                |""".stripMargin,
-            s"""
+                |
                 |  def expectsAny[$typeParams](implicit location: Location): Returns$arity[$typeParams] =
                 |    new ExpectAny$arity[$typeParams](location)
-                |""".stripMargin,
-            s"""
+                |
                 |  def never[$typeParams, R](implicit location: Location): $typ =
                 |    new Never$arity(location)
-                |""".stripMargin,
-            s"""
+                |
                 |  def combineAll[$typeParams, R](i: Iterable[$typ]): $typ =
                 |    i.reduce(_ or _)
-                |""".stripMargin,
-            s"""
-               |  def combineAll[$typeParams, R](i: $typ*): $typ =
-               |    i.reduce(_ or _)
-               |""".stripMargin,
-            s"""
+                |
+                |  def combineAll[$typeParams, R](i: $typ*): $typ =
+                |    i.reduce(_ or _)
+                |
                 |  def foldMock[A, $typeParams, R](i: Iterable[A])(f: A => $typ): $typ =
                 |    combineAll(i.map(f))
+                |
                 |""".stripMargin
-          )
         }
 
         writeLines(
