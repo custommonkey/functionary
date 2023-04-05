@@ -18,7 +18,8 @@ object Boilerplate {
       compare: String,
       applyPredicates: String,
       description: String,
-      tuple: String
+      tuple: String,
+      wildcards: String
   )
 
   object Parts {
@@ -41,7 +42,8 @@ object Boilerplate {
         and(i => s"v$i == this.v$i"),
         and(i => s"p$i(v$i)"),
         all(i => s"v$i.toString"),
-        all(i => s"t._1._$i")
+        all(i => s"t._1._$i"),
+        all(_ => "_")
       )
     }
   }
@@ -212,6 +214,7 @@ object Boilerplate {
              |      s"mock function expects $moreParamsNames and returns $$returns"
              |    case Or$arity(a, b) =>
              |      s"($$a) or ($$b)"
+             |    case _: Never$arity[$wildcards, _] => "mock function should never be called"
              |    case _ => ???
              |  }
              |}""".stripMargin

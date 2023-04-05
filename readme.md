@@ -10,6 +10,7 @@ To get started with Functionary, simply add it as a dependency to your Scala pro
 
 ```scala
 import functionary.expects
+import functionary.never
 import functionary.tuple
 import functionary.combineAll
 import functionary.FoldsOps
@@ -85,6 +86,20 @@ folded(1)
 // res8: Int = 10
 folded(2)
 // res9: Int = 20
+```
+
+```scala
+case class MyApi(sum :(Int,  Int) => Int, subtract: (Int, Int) => Int)
+
+object MyApi {
+  def apply(): MyApi = MyApi(_ + _, _ - _)
+}
+
+val api = MyApi(expects(1, 2).returns(3), never[Int, Int, Int])
+// api: MyApi = MyApi(mock function expects 1, 2 and returns 3,mock function should never be called)
+
+api.sum(1, 2)
+// res10: Int = 3
 ```
 
 ## Limitations
