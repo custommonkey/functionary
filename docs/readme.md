@@ -2,7 +2,7 @@
 
 [![Continuous Integration](https://github.com/custommonkey/functionary/actions/workflows/ci.yml/badge.svg)](https://github.com/custommonkey/functionary/actions/workflows/ci.yml)
 
-Functionary is a Scala library that provides an easy-to-use API for mocking functions in your code. It allows you to create mock functions that simulate the behavior of real functions without actually executing them, which can be useful for testing purposes.
+Functionary is a Scala library that facilitates mocking functions in your code. It allows you to create mock functions that simulate the behavior of real functions without actually executing them, which can be useful for testing purposes.
 
 ## Getting Started
 
@@ -57,6 +57,8 @@ f3(1)
 f3(2)
 ```
 
+You can also compose mock functions using the combineAll method, which takes a sequence of mock functions and combines them into a single mock function. For example:
+
 ```scala mdoc:to-string
 val list = combineAll((1 to 4).map { i => expects(i).returns(i * 2) })
 
@@ -64,6 +66,7 @@ list(1)
 list(2)
 ```
 
+Another way to compose mock functions is to use the foldMock method, which takes a function that produces mock functions for each input value, and combines them into a single mock function. For example:
 ```scala mdoc:to-string
 val folded = (1 to 4).foldMock { i => expects(i).returns(i * 10) }
 

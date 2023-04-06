@@ -2,7 +2,7 @@
 
 [![Continuous Integration](https://github.com/custommonkey/functionary/actions/workflows/ci.yml/badge.svg)](https://github.com/custommonkey/functionary/actions/workflows/ci.yml)
 
-Functionary is a Scala library that provides an easy-to-use API for mocking functions in your code. It allows you to create mock functions that simulate the behavior of real functions without actually executing them, which can be useful for testing purposes.
+Functionary is a Scala library that facilitates mocking functions in your code. It allows you to create mock functions that simulate the behavior of real functions without actually executing them, which can be useful for testing purposes.
 
 ## Getting Started
 
@@ -68,6 +68,8 @@ f3(2)
 // res5: Int = 4
 ```
 
+You can also compose mock functions using the combineAll method, which takes a sequence of mock functions and combines them into a single mock function. For example:
+
 ```scala
 val list = combineAll((1 to 4).map { i => expects(i).returns(i * 2) })
 // list: functionary.MockFunction1[Int, Int] = (((mock function expects 1 and returns 2) or (mock function expects 2 and returns 4)) or (mock function expects 3 and returns 6)) or (mock function expects 4 and returns 8)
@@ -78,6 +80,7 @@ list(2)
 // res7: Int = 4
 ```
 
+Another way to compose mock functions is to use the foldMock method, which takes a function that produces mock functions for each input value, and combines them into a single mock function. For example:
 ```scala
 val folded = (1 to 4).foldMock { i => expects(i).returns(i * 10) }
 // folded: functionary.MockFunction1[Int, Int] = (((mock function expects 1 and returns 10) or (mock function expects 2 and returns 20)) or (mock function expects 3 and returns 30)) or (mock function expects 4 and returns 40)
