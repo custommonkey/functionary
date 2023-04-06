@@ -4,6 +4,8 @@
 
 Functionary is a Scala library that facilitates mocking functions in your code. It allows you to create mock functions that simulate the behavior of real functions without actually executing them, which can be useful for testing purposes.
 
+Functionary came from a need to bridge the gap between Scala 2.13 and Scala 3 which isn't currently supported by the existing scalamock library.
+
 ## Getting Started
 
 To get started with Functionary, simply add it as a dependency to your Scala project and import it into your test files. Then, you can use the provided functions to create and configure mock functions as needed.
