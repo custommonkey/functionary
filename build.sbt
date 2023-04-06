@@ -30,3 +30,9 @@ lazy val docs = project // new documentation project
   )
   .dependsOn(root)
   .enablePlugins(MdocPlugin)
+
+lazy val cats = project
+  .settings(
+    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.4.8"
+  )
+  .dependsOn(root)

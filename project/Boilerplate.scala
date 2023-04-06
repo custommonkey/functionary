@@ -187,7 +187,7 @@ object Boilerplate {
              |}""".stripMargin
 
         val mockFunctionTrait =
-          s"""sealed trait $typ extends(($typeParams) => R) {
+          s"""trait $typ extends(($typeParams) => R) {
              |
              |  def matches($params): Option[R]
              |  def describe: List[String]
@@ -220,7 +220,7 @@ object Boilerplate {
              |}""".stripMargin
 
         val returningTrait =
-          s"""sealed trait Returns$arity[$typeParams] {
+          s"""trait Returns$arity[$typeParams] {
              |  def returns[R](r: R): $typ
              |}""".stripMargin
 
