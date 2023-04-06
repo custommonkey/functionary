@@ -57,16 +57,17 @@ f3(1)
 f3(2)
 ```
 
-You can also compose mock functions using the combineAll method, which takes a sequence of mock functions and combines them into a single mock function. For example:
+You can also compose mock functions using the `combineAll` method, which takes a sequence of mock functions and combines them into a single mock function. For example:
 
 ```scala mdoc:to-string
-val list = combineAll((1 to 4).map { i => expects(i).returns(i * 2) })
+val functions = (1 to 4).map { i => expects(i).returns(i * 2) }
+val combined = combineAll(functions)
 
-list(1)
-list(2)
+combined(1)
+combined(2)
 ```
 
-Another way to compose mock functions is to use the foldMock method, which takes a function that produces mock functions for each input value, and combines them into a single mock function. For example:
+Another way to compose mock functions is to use the `foldMock` method, which takes a function that produces mock functions for each input value, and combines them into a single mock function. For example:
 ```scala mdoc:to-string
 val folded = (1 to 4).foldMock { i => expects(i).returns(i * 10) }
 
@@ -74,16 +75,28 @@ folded(1)
 folded(2)
 ```
 
+## Mocking traits
+
+Functionary is focused on mocking functions so at the moment there is no specific support for mocking traits. One design pattern which avoids the need to mock traits is to use case classes to compose your APIs rather than using traits an inheritance. A trait can be seen as a collection of functions. This can be modeled by creating a class which contains functions as variables rather than methods. This allows for the implementation of individual functions to be changed by updating the value containing the function.
+
 ```scala mdoc:to-string
-case class MyApi(sum :(Int,  Int) => Int, subtract: (Int, Int) => Int)
+case class MyApi(
+  sum: (Int, Int) => Int, 
+  subtract: (Int, Int) => Int
+)
 
-object MyApi {
-  def apply(): MyApi = MyApi(_ + _, _ - _)
-}
+val api = MyApi(
+  _ + _,
+  _ - _
+)
 
-val api = MyApi(expects(1, 2).returns(3), never[Int, Int, Int])
+val mockApi = MyApi(
+  expects(1, 2).returns(3), 
+  never[Int, Int, Int]
+)
 
 api.sum(1, 2)
+mockApi.sum(1, 2)
 ```
 
 ## Limitations
