@@ -243,7 +243,7 @@ object Boilerplate {
           file,
           List(
             "package functionary",
-            "import functionary.Location",
+            "",
             mockFunctionTrait,
             neverClass,
             aanyClass,

@@ -18,7 +18,7 @@ lazy val root = (project in file("."))
 
 ThisBuild / testFrameworks += new TestFramework("weaver.framework.CatsEffect")
 ThisBuild / organization := "com.github.custommonkey"
-ThisBuild / crossScalaVersions := List("3.2.2", "2.13.10")
+ThisBuild / crossScalaVersions := List("3.2.2", "2.13.10", "2.12.17")
 ThisBuild / versionScheme := Some("early-semver")
 
 lazy val docs = project // new documentation project
