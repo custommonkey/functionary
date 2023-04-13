@@ -1,10 +1,10 @@
 package functionary
 
-import weaver.SimpleIOSuite
+import munit.FunSuite
 
 import scala.util.Try
 
-object MockTest extends SimpleIOSuite {
+class MockTest extends FunSuite {
 
   private val f1: MockFunction1[String, String] = expects("a").returns("b")
   private val f2: MockFunction2[Int, Int, String] = expects(1, 2).returns("b")
@@ -14,23 +14,25 @@ object MockTest extends SimpleIOSuite {
 //  private val f5: MockFunction1[Int, Int] = expects(1 , 2)
   private val f6: MockFunction2[Int, Int, Int] = tuple((1, 2) -> 2)
 
-  pureTest("default values") {
-    expect(f4(0) == "b")
+  test("default values") {
+    assertEquals(f4(0), "b")
   }
 
-  pureTest("predicates") {
+  test("predicates") {
     val p: MockFunction1[String, Int] =
       expects((s: String) => s.isEmpty).returns(1)
-    expect(p("") == 1)
+
+    assertEquals(p(""), 1)
   }
 
-  pureTest("returns expected value") {
-    expect(f1("a") == "b") and expect(f2(1, 2) == "b") and
+  test("returns expected value") {
+    assertEquals(f1("a"), "b")
+    assertEquals(f2(1, 2), "b")
 //      expect(f5(1) == 2) and
-      expect(f6(1, 2) == 2)
+    assertEquals(f6(1, 2), 2)
   }
 
-  pureTest("combine mock functions") {
+  test("combine mock functions") {
     val value = expects("b").returns("b")
     val f = f1 or f1 or value
     val ff = combineAll(f1, f1, value)
@@ -38,23 +40,51 @@ object MockTest extends SimpleIOSuite {
       expects(i).returns(i)
     }
 
-    expect(f("a") == "b") and expect(f("b") == "b") and
-      expect(ff("a") == "b") and expect(ff("b") == "b") and
-      expect(xx(1) == 1)
+    assertEquals(f("a"), "b")
+    assertEquals(f("b"), "b")
+    assertEquals(ff("a"), "b")
+    assertEquals(ff("b"), "b")
+    assertEquals(xx(1), 1)
   }
 
   private def fails[A](f: => A) = Try(f).failed.get.getMessage
 
-  pureTest("throws error for unexpected value") {
+  test("throws error for unexpected value") {
     val ff = fails(expects(0).returns("b")(1))
     val ee = fails(f3(1))
     println(ee)
-    expect(ff.startsWith("""Expected 0""")) and
-      expect(ee startsWith "Expected ,") // TODO Better error
+    assert(ff.startsWith("""Expected 0"""))
+    assert(ee startsWith "Expected ,") // TODO Better error
   }
 
-  pureTest("sane to string") {
-    expect(f1.toString() == "mock function expects a and returns b")
+  test("sane to string") {
+    assertEquals(f1.toString(), "mock function  expects a and returns b")
+  }
+
+  test("proxy") {
+    trait Thing {
+      def f(a: Int): Int
+      def x(a: Int): Int
+    }
+
+    val mocked = mock[Thing](
+      "f" -> expects(1).returns(2)
+    )
+
+    assertEquals(mocked.f(1), 2)
+
+    try {
+      mocked.x(1)
+    } catch {
+      case e: AssertionError =>
+        val message = e.getMessage
+        val expected =
+          """unexpected call to mock function Thing$1.x
+            | mock function f expects 1 and returns 2""".stripMargin
+
+        assertNoDiff(message, expected)
+    }
+
   }
 
 }

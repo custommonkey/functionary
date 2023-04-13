@@ -19,7 +19,8 @@ object Boilerplate {
       applyPredicates: String,
       description: String,
       tuple: String,
-      wildcards: String
+      wildcards: String,
+      args: String
   )
 
   object Parts {
@@ -43,7 +44,8 @@ object Boilerplate {
         and(i => s"p$i(v$i)"),
         all(i => s"v$i.toString"),
         all(i => s"t._1._$i"),
-        all(_ => "_")
+        all(_ => "_"),
+        all(i => s"args(${i - 1}).asInstanceOf[V$i]")
       )
     }
   }
@@ -187,7 +189,7 @@ object Boilerplate {
              |}""".stripMargin
 
         val mockFunctionTrait =
-          s"""sealed trait $typ extends(($typeParams) => R) {
+          s"""sealed trait $typ extends(($typeParams) => R) with MockFunction[R] {
              |
              |  def matches($params): Option[R]
              |  def describe: List[String]
@@ -195,6 +197,8 @@ object Boilerplate {
              |  def value: List[($typeParams)]
              |
              |  def or(that: $typ): $typ = Or$arity(this, that)
+             |
+             |  override def apply(args: Seq[AnyRef]): R = apply($args)
              |
              |  def apply($params): R =
              |    matches($paramsNames) match {
@@ -207,16 +211,17 @@ object Boilerplate {
              |        )
              |    }
              |
-             |  override def toString(): String = this match {
+             |  override def toString(named: String): String = this match {
              |    case Value$arity($paramsNames, returns, _) =>
-             |      s"mock function expects $moreParamsNames and returns $$returns"
+             |      s"mock function $$named expects $moreParamsNames and returns $$returns"
              |    case Predicate$arity($paramsNames, returns, _) =>
-             |      s"mock function expects $moreParamsNames and returns $$returns"
-             |    case Or$arity(a, b) =>
-             |      s"($$a) or ($$b)"
-             |    case _: Never$arity[$wildcards, _] => "mock function should never be called"
+             |      s"mock function $$named expects $moreParamsNames and returns $$returns"
+             |    case Or$arity(a, b) => s"($$a) or ($$b)"
+             |    case _: Never$arity[$wildcards, _] => s"mock function $$named should never be called"
              |    case _ => ???
              |  }
+             |
+             |  override def toString(): String = toString("")
              |}""".stripMargin
 
         val returningTrait =
