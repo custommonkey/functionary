@@ -1,5 +1,5 @@
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.4.2")
 //addSbtPlugin("community.flock.sbt" % "sbt-kotlin-plugin" % "3.0.1")
-addSbtPlugin("com.codecommit" % "sbt-github-actions" % "0.14.2")
+addSbtPlugin("com.github.sbt" % "sbt-github-actions" % "0.15.0")
 addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.3.7")
-addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.4.6")
+addSbtPlugin("org.scalameta" % "sbt-scalafmt" % "2.5.0")
