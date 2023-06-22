@@ -29,6 +29,7 @@ ThisBuild / versionScheme := Some("early-semver")
 lazy val docs = project // new documentation project
   .in(file("myproject-docs")) // important: it must not be docs/
   .settings(
+    githubWorkflowArtifactUpload := false,
     crossScalaVersions := Nil,
     scalaVersion := "2.13.11",
     tpolecatOptionsMode := _root_.io.github.davidgregory084.DevMode
