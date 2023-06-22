@@ -61,11 +61,12 @@ class MockTest extends FunSuite {
     assertEquals(f1.toString(), "mock function  expects a and returns b")
   }
 
+  trait Thing {
+    def f(a: Int): Int
+    def x(a: Int): Int
+  }
+
   test("proxy") {
-    trait Thing {
-      def f(a: Int): Int
-      def x(a: Int): Int
-    }
 
     val mocked = mock[Thing](
       "f" -> expects(1).returns(2)
@@ -79,7 +80,7 @@ class MockTest extends FunSuite {
       case e: AssertionError =>
         val message = e.getMessage
         val expected =
-          """unexpected call to mock function Thing$1.x
+          """unexpected call to mock function Thing.x
             | mock function f expects 1 and returns 2""".stripMargin
 
         assertNoDiff(message, expected)
