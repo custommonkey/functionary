@@ -22,7 +22,6 @@ lazy val root = (project in file("."))
       .taskValue
   )
 
-//ThisBuild / testFrameworks += new TestFramework("weaver.framework.CatsEffect")
 ThisBuild / testFrameworks += new TestFramework("munit.Framework")
 ThisBuild / organization := "com.github.custommonkey"
 ThisBuild / crossScalaVersions := List(SCALA_33, SCALA_213, SCALA_212)
