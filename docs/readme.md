@@ -16,6 +16,7 @@ import functionary.never
 import functionary.tuple
 import functionary.combineAll
 import functionary.FoldsOps
+import functionary.mock
 ```
 
 ## Defining a Mock Function
@@ -79,25 +80,18 @@ folded(2)
 
 ## Mocking traits
 
-Functionary is focused on mocking functions so at the moment there is no specific support for mocking traits. One design pattern which avoids the need to mock traits is to use case classes to compose your APIs rather than using traits an inheritance. A trait can be seen as a collection of functions. This can be modeled by creating a class which contains functions as variables rather than methods. This allows for the implementation of individual functions to be changed by updating the value containing the function.
-
 ```scala mdoc:to-string
-case class MyApi(
-  sum: (Int, Int) => Int, 
-  subtract: (Int, Int) => Int
+trait MyApi {
+  def sum(a: Int, b: Int) : Int
+  def subtract(a: Int, b: Int) : Int
+}
+
+val mockApi = mock[MyApi](
+//  classOf[MyApi].getClassLoader,
+  "sum" -> expects(1, 2).returns(3), 
+  "subtract" -> never[Int, Int, Int]
 )
 
-val api = MyApi(
-  _ + _,
-  _ - _
-)
-
-val mockApi = MyApi(
-  expects(1, 2).returns(3), 
-  never[Int, Int, Int]
-)
-
-api.sum(1, 2)
 mockApi.sum(1, 2)
 ```
 

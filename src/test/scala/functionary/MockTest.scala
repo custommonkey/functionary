@@ -6,21 +6,19 @@ import scala.util.Try
 
 class MockTest extends FunSuite {
 
-  private val f1: MockFunction1[String, String] = expects("a").returns("b")
-  private val f2: MockFunction2[Int, Int, String] = expects(1, 2).returns("b")
-  private val f3: MockFunction1[Int, Int] = never[Int, Int]
-  private val f4: MockFunction1[Int, String] =
-    expectsAny[Int].returns("b")
+  private val f1 = expects("a").returns("b")
+  private val f2 = expects(1, 2).returns("b")
+  private val f3 = never[Int, Int]
+  private val f4 = expectsAny[Int].returns("b")
 //  private val f5: MockFunction1[Int, Int] = expects(1 , 2)
-  private val f6: MockFunction2[Int, Int, Int] = tuple((1, 2) -> 2)
+  private val f6 = tuple((1, 2) -> 2)
 
   test("default values") {
     assertEquals(f4(0), "b")
   }
 
   test("predicates") {
-    val p: MockFunction1[String, Int] =
-      expects((s: String) => s.isEmpty).returns(1)
+    val p = expects((s: String) => s.isEmpty).returns(1)
 
     assertEquals(p(""), 1)
   }
@@ -58,7 +56,7 @@ class MockTest extends FunSuite {
   }
 
   test("sane to string") {
-    assertEquals(f1.toString(), "mock function  expects a and returns b")
+    assertEquals(f1.toString(), "mock function expects a and returns b")
   }
 
   trait Thing {

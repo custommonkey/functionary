@@ -39,3 +39,4 @@ lazy val docs = project // new documentation project
   )
   .dependsOn(root)
   .enablePlugins(MdocPlugin)
+  .disablePlugins(TpolecatPlugin)

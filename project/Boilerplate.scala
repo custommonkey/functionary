@@ -211,17 +211,20 @@ object Boilerplate {
              |        )
              |    }
              |
-             |  override def toString(named: String): String = this match {
-             |    case Value$arity($paramsNames, returns, _) =>
-             |      s"mock function $$named expects $moreParamsNames and returns $$returns"
-             |    case Predicate$arity($paramsNames, returns, _) =>
-             |      s"mock function $$named expects $moreParamsNames and returns $$returns"
-             |    case Or$arity(a, b) => s"($$a) or ($$b)"
-             |    case _: Never$arity[$wildcards, _] => s"mock function $$named should never be called"
-             |    case _ => ???
+             |  override def toString(named: Option[String]): String = {
+             |    val name = named.map(" " + _).getOrElse("")
+             |    this match {
+             |      case Value$arity($paramsNames, returns, _) =>
+             |        s"mock function$$name expects $moreParamsNames and returns $$returns"
+             |      case Predicate$arity($paramsNames, returns, _) =>
+             |        s"mock function$$name expects $moreParamsNames and returns $$returns"
+             |      case Or$arity(a, b) => s"($$a) or ($$b)"
+             |      case _: Never$arity[$wildcards, _] => s"mock function$$name should never be called"
+             |      case _ => ???
+             |    }
              |  }
              |
-             |  override def toString(): String = toString("")
+             |  override def toString(): String = toString(None)
              |}""".stripMargin
 
         val returningTrait =
