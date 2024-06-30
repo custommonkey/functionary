@@ -28,6 +28,9 @@ ThisBuild / organization := "com.github.custommonkey"
 ThisBuild / crossScalaVersions := List(SCALA_33, SCALA_213, SCALA_212)
 ThisBuild / versionScheme := Some("early-semver")
 
+ThisBuild / githubOwner := "custommonkey"
+ThisBuild / githubRepository := "functionary"
+
 lazy val docs = project // new documentation project
   .in(file("myproject-docs")) // important: it must not be docs/
   .settings(
