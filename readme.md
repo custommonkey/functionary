@@ -105,7 +105,6 @@ trait MyApi {
 }
 
 val mockApi = mock[MyApi](
-//  classOf[MyApi].getClassLoader,
   "sum" -> expects(1, 2).returns(3), 
   "subtract" -> never[Int, Int, Int]
 )
