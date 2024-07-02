@@ -13,50 +13,58 @@ object Boilerplate {
       predicates: String,
       predicateNames: String,
       paramsNames: String,
-      moreParamsNames: String,
       typ: String,
       compare: String,
       applyPredicates: String,
       description: String,
       tuple: String,
       wildcards: String,
-      args: String
+      args: String,
+      equalThings: String
   )
+
+  class Arity(val value: Int) extends AnyVal
+
+  private def all(f: Int => String)(implicit arity: Arity): String =
+    (1 to arity.value).map(f).mkString(", ")
 
   object Parts {
     def apply(arity: Int): Parts = {
-      val range = (1 to arity)
+      implicit val a = new Arity(arity)
+      val range = 1 to arity
       val name = s"MockFunction$arity"
-      def all(f: Int => String) = range.map(f).mkString(", ")
       def and(f: Int => String) = range.map(f).mkString(" && ")
       val typeParams = all(i => s"V$i")
+      val equals = all(i => s"v$i.equals")
       new Parts(
-        range,
-        name,
-        typeParams,
-        all(i => s"v$i: V$i"),
-        all(i => s"p$i: V$i => Boolean"),
-        all(i => s"p$i"),
-        all(i => s"v$i"),
-        all(i => s"$$v$i"),
-        s"$name[$typeParams, R]",
-        and(i => s"v$i == this.v$i"),
-        and(i => s"p$i(v$i)"),
-        all(i => s"v$i.toString"),
-        all(i => s"t._1._$i"),
-        all(_ => "_"),
-        all(i => s"args(${i - 1}).asInstanceOf[V$i]")
+        range = range,
+        name = name,
+        typeParams = typeParams,
+        equalThings = equals,
+        params = all(i => s"v$i: V$i"),
+        predicates = all(i => s"p$i: V$i => Boolean"),
+        predicateNames = all(i => s"p$i"),
+        paramsNames = all(i => s"v$i"),
+        typ = s"$name[$typeParams, R]",
+        compare = and(i => s"this.v$i(v$i)"),
+        applyPredicates = and(i => s"p$i(v$i)"),
+        description = all(i => s"v$i.toString"),
+        tuple = all(i => s"Param.Value(t._1._$i)"),
+        wildcards = all(_ => "_"),
+        args = all(i => s"args(${i - 1}).asInstanceOf[V$i]")
       )
     }
   }
+
+  private val MaxArity = 2
 
   def gen(outDir: File): Seq[File] = {
     val extensionFile = new File(packageDir(outDir), "Folding.scala").tap {
       file =>
 
-        val apiFunctions = (1 to 5).flatMap { arity =>
+        val apiFunctions = (1 to MaxArity).flatMap { arity =>
           val parts = Parts(arity)
-          import parts._
+          import parts.*
           List(
             s"""
              |  def foldMock[$typeParams, R](f: A => $typ): $typ =
@@ -78,43 +86,57 @@ object Boilerplate {
     val apiFile = new File(packageDir(outDir), "GeneratedApi.scala").tap {
       file =>
 
-        val apiFunctions = (1 to 5).map { arity =>
+        val apiFunctions = (1 to MaxArity).map { arity =>
+          implicit val a: Arity = new Arity(arity)
+
           val parts = Parts(arity)
-          import parts._
+          import parts.*
 
           val x = if (arity == 1) {
             typeParams
           } else { s"($typeParams)" }
-          val y = if (arity == 1) {
-            "t._1"
+
+          val normalTuple = if (arity == 1) {
+            "Param.Value(t._1)"
           } else tuple
 
+          val values =
+            (1 to arity).map { i => s"Param.Value(v$i)" }.mkString(", ")
+
+          val xxx =
+            (1 to arity).map { i => s"Param.Predicate(p$i)" }.mkString(", ")
+
           s"""
-                |  def expects[$typeParams]($params)(implicit location: Location): Returns$arity[$typeParams] =
-                |    new PartialExpect$arity[$typeParams]($paramsNames, location)
-                |
-                |  def tuple[$typeParams, R](t: ($x, R))(implicit location: Location): $typ =
-                |    new Value$arity[$typeParams, R]($y, t._2, location)
-                |
-                |  def expects[$typeParams]($predicates)(implicit location: Location): Returns$arity[$typeParams] =
-                |    new PartialPredicate$arity[$typeParams]($predicateNames, location)
-                |
-                |  def expectsAny[$typeParams](implicit location: Location): Returns$arity[$typeParams] =
-                |    new ExpectAny$arity[$typeParams](location)
-                |
-                |  def never[$typeParams, R](implicit location: Location): $typ =
-                |    new Never$arity(location)
-                |
-                |  def combineAll[$typeParams, R](i: Iterable[$typ]): $typ =
-                |    i.reduce(_ or _)
-                |
-                |  def combineAll[$typeParams, R](i: $typ*): $typ =
-                |    i.reduce(_ or _)
-                |
-                |  def foldMock[A, $typeParams, R](i: Iterable[A])(f: A => $typ): $typ =
-                |    combineAll(i.map(f))
-                |
-                |""".stripMargin
+             |  def expects[$typeParams]($params)(implicit location: Location): Value$arity[$typeParams, Nothing] =
+             |    new Value$arity[$typeParams, Nothing]($values, None, location, None)
+             |
+             |  def tuple[$typeParams, R](t: ($x, R))(implicit location: Location):  Value$arity[$typeParams, R]  =
+             |    new Value$arity[$typeParams, R]($normalTuple, Some(t._2), location, None)
+             |
+             |  def expects[$typeParams]($predicates)(implicit location: Location): Value$arity[$typeParams, Nothing] =
+             |    new Value$arity[$typeParams, Nothing]($xxx, None, location, None)
+             |
+             |  def returns[$typeParams, R](r: R)(implicit location: Location): Value$arity[$typeParams, R] =
+             |    new Value$arity[$typeParams, R](
+             |      $anys,
+             |      Some(r),
+             |      location,
+             |      None
+             |    )
+             |
+             |  def never[$typeParams, R](implicit location: Location): Value$arity[$typeParams, R] =
+             |    new Value$arity($anys, None, location, None)
+             |
+             |  def combineAll[$typeParams, R](i: Iterable[$typ]): $typ =
+             |    i.reduce(_ or _)
+             |
+             |  def combineAll[$typeParams, R](i: $typ*): $typ =
+             |    i.reduce(_ or _)
+             |
+             |  def foldMock[A, $typeParams, R](i: Iterable[A])(f: A => $typ): $typ =
+             |    combineAll(i.map(f))
+             |
+             |""".stripMargin
         }
 
         writeLines(
@@ -126,41 +148,47 @@ object Boilerplate {
         )
     }
 
-    (1 to 5).map { arity =>
+    (1 to MaxArity).map { arity =>
+
+      implicit val a: Arity = new Arity(arity)
 
       val parts = Parts(arity)
-      import parts._
+      import parts.*
 
       outFile(outDir, name).tap { file =>
         println(s"Making file $file")
 
-        val predicateClass =
-          s"""private case class Predicate$arity[$typeParams, R](
-             |    $predicates,
-             |    returns: R,
-             |    location: Location
-             |) extends $typ {
-             |
-             |  override def matches($params): Option[R] =
-             |    if ($applyPredicates) Some(returns)
-             |    else None
-             |
-             |  override def describe: List[String] = Nil
-             |  override def locations: List[Location] = List(location)
-             |  override def value: List[($typeParams)] = Nil
-             |}""".stripMargin
+        val values = (1 to arity).map { i => s"v$i: Param[V$i]" }.mkString(", ")
+        val paramTypes = (1 to arity).map { i => s"Param[V$i]" }.mkString(", ")
+
+        val typr = s"$name[$typeParams, RR]"
 
         val valueClass =
-          s"""case class Value$arity[$typeParams, R]($params, returns: R, location: Location) extends $typ {
+          s"""case class Value$arity[$typeParams, R](
+             |  $values,
+             |  returns: Option[R],
+             |  location: Location,
+             |  name: Option[String])
+             |extends $typ {
              |
              |  override def matches($params): Option[R] =
-             |    if ($compare) Some(returns)
+             |    if ($compare) returns
              |    else None
              |
-             |  override def value: List[($typeParams)] = List(($paramsNames))
+             |  def returns[RR](r: RR): $typr  =
+             |    new Value$arity($paramsNames, Some(r), location, None)
+             |
+             |  override def value: List[($paramTypes)] = List(($paramsNames))
+             |
              |  override def describe: List[String] = List($description)
+             |
              |  override def locations: List[Location] = List(location)
-             |}""".stripMargin
+             |
+             |  def named(name: String): $typ =
+             |    new Value$arity($paramsNames, returns, location, Some(name))
+             |
+             |}
+             |""".stripMargin
 
         val orClass =
           s"""case class Or$arity[$typeParams, R](a: $typ, b: $typ) extends $typ {
@@ -168,33 +196,26 @@ object Boilerplate {
              |    a.matches($paramsNames).orElse(b.matches($paramsNames))
              |
              |  override def describe: List[String] = a.describe ++ b.describe
+             |
              |  override def locations: List[Location] = a.locations ++ b.locations
-             |  override def value: List[($typeParams)] = a.value ++ b.value
-             |}""".stripMargin
+             |
+             |  override def value: List[($paramTypes)] = a.value ++ b.value
+             |
+             |}
+             |""".stripMargin
 
-        val aanyClass =
-          s"""case class AAny$arity[$typeParams, R](r: R, location: Location) extends $typ {
-             |  override def matches($params): Option[R] = Some(r)
-             |  override def describe: List[String] = Nil
-             |  override def locations: List[Location] = List(location)
-             |  override def value: List[($typeParams)] = Nil
-             |}""".stripMargin
-
-        val neverClass =
-          s"""class Never$arity[$typeParams, R](location: Location) extends $typ {
-             |  override def matches($params): Option[R] = None
-             |  override def value: List[($typeParams)] = Nil
-             |  override def locations: List[Location] = List(location)
-             |  override def describe: List[String] = Nil
-             |}""".stripMargin
+        val moreParamsNames = all(i => s"$$v$i")
 
         val mockFunctionTrait =
           s"""sealed trait $typ extends(($typeParams) => R) with MockFunction[R] {
              |
              |  def matches($params): Option[R]
+             |
              |  def describe: List[String]
+             |
              |  def locations: List[Location]
-             |  def value: List[($typeParams)]
+             |
+             |  def value: List[($paramTypes)]
              |
              |  def or(that: $typ): $typ = Or$arity(this, that)
              |
@@ -211,41 +232,17 @@ object Boilerplate {
              |        )
              |    }
              |
-             |  override def toString(named: Option[String]): String = {
-             |    val name = named.map(" " + _).getOrElse("")
+             |  override def toString(): String =
              |    this match {
-             |      case Value$arity($paramsNames, returns, _) =>
-             |        s"mock function$$name expects $moreParamsNames and returns $$returns"
-             |      case Predicate$arity($paramsNames, returns, _) =>
+             |      case Value$arity($paramsNames, returnsOpt, _, nameOpt) =>
+             |        val name = nameOpt.map(" " + _).getOrElse("")
+             |        val returns = returnsOpt.map(_.toString).getOrElse("<nothing>")
              |        s"mock function$$name expects $moreParamsNames and returns $$returns"
              |      case Or$arity(a, b) => s"($$a) or ($$b)"
-             |      case _: Never$arity[$wildcards, _] => s"mock function$$name should never be called"
-             |      case _ => ???
              |    }
-             |  }
              |
-             |  override def toString(): String = toString(None)
-             |}""".stripMargin
-
-        val returningTrait =
-          s"""sealed trait Returns$arity[$typeParams] {
-             |  def returns[R](r: R): $typ
-             |}""".stripMargin
-
-        val expectAnyClass =
-          s"""class ExpectAny$arity[$typeParams](location: Location) extends Returns$arity[$typeParams] {
-             |  def returns[R](r: R): $typ = new AAny$arity(r, location)
-             |}""".stripMargin
-
-        val partialExpectClass =
-          s"""private class PartialExpect$arity[$typeParams]($params, location: Location) extends Returns$arity[$typeParams]{
-             |  override def returns[R](r: R): $typ = Value$arity($paramsNames, r, location)
-             |}""".stripMargin
-
-        val partialPredicateClass =
-          s"""private class PartialPredicate$arity[$typeParams]($predicates, location: Location) extends Returns$arity[$typeParams] {
-             |  override def returns[R](r: R): $typ = Predicate$arity[$typeParams, R]($predicateNames, r, location)
-             |}""".stripMargin
+             |}
+             |""".stripMargin
 
         writeLines(
           file,
@@ -253,20 +250,16 @@ object Boilerplate {
             "package functionary",
             "",
             mockFunctionTrait,
-            neverClass,
-            aanyClass,
-            expectAnyClass,
             orClass,
-            partialExpectClass,
-            valueClass,
-            predicateClass,
-            returningTrait,
-            partialPredicateClass
+            valueClass
           )
         )
       }
     } :+ apiFile :+ extensionFile
   }
+
+  private def anys(implicit arity: Arity) =
+    List.fill(arity.value)("Param.Any()").mkString(", ")
 
   private def packageDir(outDir: File) =
     new File(outDir, "functionary").tap(createDirectory)

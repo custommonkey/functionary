@@ -43,7 +43,7 @@ f2(1, 2)
 Functionary also allows the use of predicates. For example, you can define a mock function that takes a string argument and returns 1 if the string is empty:
 ```scala
 val f4 = expects((s: String) => s.isEmpty).returns(1)
-// f4: functionary.MockFunction1[String, Int] = mock function expects <function1> and returns 1
+// f4: functionary.MockFunction1[String, Int] = mock function expects Predicate(<function1>) and returns 1
 
 f4("")
 // res2: Int = 1
@@ -51,7 +51,7 @@ f4("")
 
 ```scala
 val f5 = tuple((1, 2) -> 3)
-// f5: functionary.MockFunction2[Int, Int, Int] = mock function expects 1, 2 and returns 3
+// f5: functionary.Value2[Int, Int, Int] = mock function expects 1, 2 and returns 3
 
 f5(1, 2)
 // res3: Int = 3
@@ -108,8 +108,8 @@ val mockApi = mock[MyApi](
   "sum" -> expects(1, 2).returns(3), 
   "subtract" -> never[Int, Int, Int]
 )
-// mockApi: MyApi = mock function MyApi.toString
-//  mock function sum expects 1, 2 and returns 3, mock function subtract should never be called
+// mockApi: MyApi = mock MyApi
+//  mock function expects 1, 2 and returns 3, mock function expects *, * and returns <nothing>
 // 
 
 mockApi.sum(1, 2)
